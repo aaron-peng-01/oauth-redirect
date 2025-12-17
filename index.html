@@ -6,7 +6,6 @@
 </head>
 <body>
 <script>
-  // 解析 URL 中的 token 或 code
   const params = new URLSearchParams(window.location.search);
   const hash = new URLSearchParams(window.location.hash.substring(1));
 
@@ -17,17 +16,12 @@
     raw: window.location.href
   };
 
-  // 尝试发送给 opener（适用于桌面应用打开浏览器）
-  if (window.opener) {
-    window.opener.postMessage(data, "*");
-    window.close();
-  } else {
-    // 如果没有 opener，则显示给用户复制
-    document.body.innerHTML = `
-      <h2>OAuth Success</h2>
-      <pre>${JSON.stringify(data, null, 2)}</pre>
-      <p>Copy this token back to your app.</p>
-    `;
+  // Flutter WebView / InAppBrowser 会监听 postMessage
+  window.opener?.postMessage(data, "*");
+
+  // 如果是移动端 App，使用自定义 scheme 回传
+  if (data.token) {
+    window.location = "wowokwallet://oauth?token=" + data.token;
   }
 </script>
 </body>
